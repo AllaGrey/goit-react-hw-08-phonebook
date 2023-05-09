@@ -16,6 +16,7 @@ export const Filter = () => {
     <Label>
       Find contacts by name
       <Input type="text" value={filter} onChange={onChangeFilter} />
+
     </Label>  
   );
 };

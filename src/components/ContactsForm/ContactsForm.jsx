@@ -1,21 +1,18 @@
 import { FormContainer, Label, Button, Title } from './ContactForm.styled';
 import { Field } from './ContactForm.styled';
 import { Formik, Form } from 'formik';
-import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/operations';
-import { getContacts } from 'redux/selectors';
+import { useAddContactMutation, useGetContactsQuery } from 'redux/contactsSlice';
 
 export const ContactsForm = () => {
-
-  const dispatch = useDispatch()
-  const contacts = useSelector(getContacts)
+const {data} = useGetContactsQuery()
+  const [addContact] = useAddContactMutation()
 
   const handleSubmit = (values, { resetForm }) => {
     
-    const isDublicate = contacts.find(
+    const isDublicate = data.find(
       ({ name }) => name.toLocaleLowerCase() === values.name.toLowerCase()
     );
-    isDublicate ? alert(`${values.name} is already in contacts.`) : dispatch(addContact(values));
+    isDublicate ? alert(`${values.name} is already in contacts.`) : addContact(values);
     resetForm()
   
   };
