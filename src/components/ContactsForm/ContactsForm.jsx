@@ -1,26 +1,33 @@
 import { FormContainer, Label, Button, Title } from './ContactForm.styled';
 import { Field } from './ContactForm.styled';
 import { Formik, Form } from 'formik';
-import { useAddContactMutation, useGetContactsQuery } from 'redux/contactsSlice';
+import { addContact } from 'redux/contactsOperations';
+import { getContacts } from 'redux/selectors';
+import { useDispatch, useSelector } from 'react-redux';
+
+
 
 export const ContactsForm = () => {
-const {data} = useGetContactsQuery()
-  const [addContact] = useAddContactMutation()
+
+  const dispatch = useDispatch()
+  const contacts = useSelector(getContacts)
+
 
   const handleSubmit = (values, { resetForm }) => {
     
-    const isDublicate = data.find(
+    const isDublicate = contacts.find(
       ({ name }) => name.toLocaleLowerCase() === values.name.toLowerCase()
     );
-    isDublicate ? alert(`${values.name} is already in contacts.`) : addContact(values);
-    resetForm()
+    isDublicate ? alert(`${values.name} is already in contacts.`) : dispatch(addContact(values));
+    resetForm();
+
   
   };
 
   return (
     <FormContainer>
       <Title>Phonebook</Title>
-      <Formik initialValues={{ name: '', phone: '' }} onSubmit={handleSubmit}>
+      <Formik initialValues={{ name: '', number: '' }} onSubmit={handleSubmit}>
         <Form>
           <Label>
             Name
@@ -36,7 +43,7 @@ const {data} = useGetContactsQuery()
             Number
             <Field
               type="tel"
-              name="phone"
+              name="number"
               pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
               title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
               required
@@ -48,4 +55,3 @@ const {data} = useGetContactsQuery()
     </FormContainer>
   );
 };
-

@@ -12,8 +12,12 @@ export const Button = styled.button`
   width: 60px;
   border: none;
   padding: 3px;
-  border-radius: 10px;
+  border-radius: 5px;
   background-color: red;
   color: white;
   display: inline;
+
+  &:hover {
+    background-color: transparent;
+  }
 `;

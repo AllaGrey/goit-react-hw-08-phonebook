@@ -1,31 +1,47 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createSlice, isAnyOf } from '@reduxjs/toolkit'
+import { fetchContacts, addContact, deleteContact } from '../redux/contactsOperations'
 
 
-export const contactsApi = createApi({
-  reducerPath: 'contactsApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://6456b51a2e41ccf1692374e0.mockapi.io/' }),
-  tagTypes: ['Contacts'],
-  endpoints: (builder) => ({
-    getContacts: builder.query({
-      query: () => `/contacts`,
-      providesTags: ['Contacts']
-    }),
-    addContact: builder.mutation({
-      query: (values) => ({
-        url: '/contacts',
-        method: 'POST',
-        body: values,
-      }),
-      invalidatesTags: ['Contacts']
-    }),
-    deleteContact: builder.mutation({
-      query: (id) => ({
-        url: `/contacts/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Contacts']
+const initialState = {
+  items: [],
+  isLoading: false,
+  error: null,
+}
+
+const extraActions = [fetchContacts, addContact, deleteContact];
+const getActions = type => isAnyOf(...extraActions.map(action => action[type]));
+
+const handlePending = (state) => {
+  state.isLoading = true;
+} 
+
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
+}
+
+const handleFulfilled = (state) => {
+  state.isLoading = false;
+  state.error = null;
+}
+
+export const contactsSlice = createSlice({
+  name: 'contacts',
+  initialState,
+  extraReducers: builder => builder
+    .addCase(fetchContacts.fulfilled,(state, action) => {
+      state.items = action.payload;
     })
-  }),
+    .addCase(addContact.fulfilled, (state, action) => {
+      state.items.push(action.payload)
+    })
+    .addCase(deleteContact.fulfilled, (state, action) => {
+      const deleteIndex = state.items.findIndex(item => item.id === action.payload.id);
+      state.items.splice(deleteIndex, 1);
+    })
+    .addMatcher(getActions('pending'), handlePending)
+    .addMatcher(getActions('fulfilled'), handleFulfilled)
+    .addMatcher(getActions('rejected'), handleRejected)
 })
 
-export const {useGetContactsQuery, useAddContactMutation, useDeleteContactMutation} = contactsApi
+export const contactsSliceReducer = contactsSlice.reducer
